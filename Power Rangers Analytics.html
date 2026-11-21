@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Power Rangers Analytics</title>
+<style>
+:root{--bg:linear-gradient(160deg,#dbe7ff 0%,#ece3ff 55%,#ffe3ea 100%);--card:#ffffffee;--tx:#1b1b22;--mut:#5f5f78;--bd:#c9d4f2;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:linear-gradient(160deg,#0d1030 0%,#1a1038 55%,#2a0f26 100%);--card:#1b1d3acc;--tx:#f0f0f8;--mut:#a3a6c8;--bd:#34386a;color-scheme:dark}}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg) fixed;color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.45}
+main{max-width:900px;margin:0 auto;padding:20px 16px 40px}
+h1{margin:0 0 4px;font-size:1.7rem}h2{font-size:1.15rem;margin:28px 0 10px}
+p.s{color:var(--mut);margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px}
+.sl{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.sl label{font-size:.85rem;display:block}.sl input{width:100%}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.best{border-top-width:6px}.best b{font-size:1.02rem}.best .sc{font-size:1.7rem;font-weight:700}
+.row{display:grid;grid-template-columns:32px minmax(120px,210px) 1fr 40px;gap:8px;align-items:center;padding:4px 0;font-size:.9rem}
+.bar{height:12px;border-radius:6px;background:var(--bd);overflow:hidden}.bar i{display:block;height:100%}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+small{color:var(--mut)}
+.row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+input[type=search]{width:100%;box-sizing:border-box;padding:9px 12px;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--tx);font-size:1rem;margin-bottom:8px}
+summary{list-style:none;cursor:pointer}summary::-webkit-details-marker{display:none}.why{padding:4px 8px 12px 40px;font-size:.85rem;color:var(--mut)}.why p{margin:4px 0}.why b{color:var(--tx)}.rub{font-size:.88rem}.rub td,.rub th{padding:4px 8px;text-align:left;vertical-align:top;border-bottom:1px solid var(--bd)}.rub{border-collapse:collapse;width:100%}.tw{overflow-x:auto}
+</style></head><body><main>
+<h1>⚡ Power Rangers Analytics</h1>
+<p class="s"><b id="cnt"></b> rangers across every US season, Mighty Morphin through Cosmic Fury. Scores are my own subjective 1–10 ratings; drag the weights to match your taste.</p>
+<div class="card"><div class="sl" id="sl"></div></div>
+<h2>Best of each color</h2><div class="grid" id="best"></div>
+<h2>Overall ranking</h2><input type="search" id="q" placeholder="Search name, season or color…"><div class="card" id="rank"></div>
+<h2>How the grades work</h2><div class="card"><p class="s">Tap any ranger in the ranking to see their five scores in plain words. All grades are my own judgment from general knowledge of the shows, not official stats. A handful of landmark rangers have a written reason; the rest are rough estimates based on screen time, role on the team and how memorable they are.</p><div class="tw"><table class="rub"><tr><th>Criterion</th><th>9–10</th><th>7–8</th><th>5–6</th><th>1–4</th></tr><tr><td>Combat</td><td>Elite, beats top villains</td><td>Strong, reliable</td><td>Average or support</td><td>Rarely wins fights</td></tr><tr><td>Leadership</td><td>Team's strategic core</td><td>Leads or co-leads</td><td>Contributes ideas</td><td>Rarely leads</td></tr><tr><td>Arsenal</td><td>Signature Zord, weapons, upgrades</td><td>Notable gear or upgrade</td><td>Standard gear</td><td>Little gear of note</td></tr><tr><td>Arc</td><td>Major growth or redemption</td><td>Clear development</td><td>Some development</td><td>Mostly static</td></tr><tr><td>Iconic</td><td>Franchise-defining</td><td>Well-known, fan favorite</td><td>Known to fans of the season</td><td>Easily forgotten</td></tr></table></div></div>
+<p class="s" style="margin-top:20px"><small>Covers main teams, Sixth/Gold/Silver rangers and major extras. Rosters for Turbo, Ninja Steel, Dino Charge, Dino Fury, Cosmic Fury and Beast Morphers were checked against wiki sources. Dark = evil or corrupted rangers (Dark, Psycho, Shadow, A-Squad and similar). Omitted: spin-offs, comic-only rangers and cameos. Roxy and Blaze never morphed as heroes, so only their evil avatars are listed. Scores are opinion. Shades (Navy, Crimson, Aqua) are grouped under their base color.</small></p>
+</main>
+<script>
+const C={Red:"#e53935",Blue:"#1e88e5",Yellow:"#f9a825",Pink:"#ec407a",Green:"#2e9e4f",Black:"#4a4a55",White:"#b0b8c4",Gold:"#c9a227",Silver:"#9aa3ad",Purple:"#8e44ad",Orange:"#f57c00",Dark:"#6d4c41",Other:"#888"};
+const K=["Combat","Leadership","Arsenal","Arc","Iconic"];
+// Season:Name|Color|code(combat,leader,arsenal,arc,iconic; A=10)
+const S=`Mighty Morphin:Jason Lee Scott|Red|8988A;Zack Taylor|Black|85678;Billy Cranston|Blue|56799;Trini Kwan|Yellow|86778;Kimberly Hart|Pink|9678A;Tommy Oliver (Green)|Green|A8AAA;Rocky DeSantos|Red|78767;Adam Park|Black|86686;Aisha Campbell|Yellow|76667;Tommy Oliver (White)|White|A9999
+Zeo:Tommy Oliver (Zeo Red)|Red|A9998;Adam Park (Zeo Green)|Green|86777;Rocky DeSantos (Zeo Blue)|Blue|77677;Tanya Sloan|Yellow|76656;Kat Hillard|Pink|86787;Jason Scott (Zeo Gold)|Gold|99887;Trey of Triforia|Gold|55556
+Turbo:Justin Stewart|Blue|55776;TJ Johnson (Turbo Red)|Red|77777;Carlos Vallerte (Turbo Green)|Green|66666;Ashley Hammond|Yellow|66666;Cassie Chan|Pink|65776;Phantom Ranger|Other|77767;Blue Senturion|Blue|66656
+In Space:Andros|Red|99898;TJ Johnson (Space Blue)|Blue|77878;Carlos Vallerte (Space Black)|Black|76777;Zhane|Silver|87787
+Lost Galaxy:Leo Corbett|Red|79696;Kai Chen|Blue|76767;Maya|Yellow|76757;Kendrix Morgan|Pink|66786;Damon Henderson|Green|76766;Karone|Pink|77689;Mike Corbett (Magna Defender)|Other|88798
+Lightspeed Rescue:Carter Grayson|Red|78777;Chad Lee|Blue|67666;Kelsey Winslow|Yellow|66655;Joel Rawlings|Green|66666;Dana Mitchell|Pink|67676;Ryan Mitchell (Titanium)|Silver|87777
+Time Force:Wes Collins|Red|87878;Jen Scotts|Pink|88788;Lucas Kendall|Blue|77666;Katie Walker|Yellow|76667;Trip Regis|Green|66666;Eric Myers (Quantum)|Other|88898
+Wild Force:Cole Evans|Red|88886;Taylor Earhart|Yellow|76666;Max Cooper|Blue|66666;Alyssa Enrile|White|77666;Danny Delgado|Black|76666;Merrick Baliton (Lunar Wolf)|Silver|88778
+Ninja Storm:Shane Clarke|Red|77777;Tori Hanson|Blue|88777;Dustin Brooks|Yellow|77777;Hunter Bradley (Crimson)|Red|87878;Blake Bradley (Navy)|Blue|88777;Cam Watanabe|Green|78888
+Dino Thunder:Conner McKnight|Red|77777;Ethan James|Blue|66777;Kira Ford|Yellow|77777;Trent Fernandez|White|76897;Tommy Oliver (Black)|Black|A9A99
+S.P.D.:Jack Landors|Red|77777;Sky Tate|Blue|77877;Bridge Carson|Green|66787;Z Delgado|Yellow|76766;Syd Drew|Pink|66666;Sam (Omega)|Other|55765;Anubis Cruger (Shadow)|Other|87787
+Mystic Force:Nick Russell|Red|77787;Madison Rocca|Yellow|66666;Chip Thorn|Blue|66666;Vida Rocca|Pink|66666;Xander Bly|Green|55766;Udonna|White|86887;Daggeron (Solaris Knight)|Gold|88787;Leanbow (Wolf Warrior)|Red|87776
+Operation Overdrive:Mackenzie Hartford|Red|77777;Will Aston|Black|77777;Dax Lo|Blue|66666;Rose Ortiz|Pink|66677;Ronny Robinson|Yellow|67666;Tyzonn (Mercury)|Silver|77777
+Jungle Fury:Casey Rhodes|Red|77777;Lily Chilman|Yellow|66666;Theo Martin|Blue|66666;Dominic Hargan|Black|77666;Robbie James|White|66666;RJ (Wolf)|Purple|88878
+R.P.M.:Scott Truman|Red|77777;Flynn McAllistair|Blue|66666;Summer Landsdown|Yellow|66666;Dillon|Black|88787;Ziggy Grover|Green|66669;Gem|Gold|77767;Gemma|Silver|77767
+Samurai:Jayden Shiba|Red|88878;Lauren Shiba|Red|77777;Kevin|Blue|78777;Mia Watanabe|Pink|66666;Mike|Green|66667;Emily|Yellow|66667;Antonio Garcia|Gold|78877
+Megaforce:Troy Burrows|Red|77777;Jake Holling|Black|77666;Noah Carver|Blue|66666;Emma Goodall|Pink|66666;Gia Moran|Yellow|66666;Robo Knight|Silver|87677;Orion|Silver|87777
+Dino Charge:Tyler Navarro|Red|77777;Chase Randall|Black|77666;Koda|Blue|78776;Riley Griffin|Green|66666;Shelby Watkins|Pink|66666;Sir Ivan of Zandar|Gold|87778;James Navarro (Aqua)|Blue|66666;Prince Phillip III (Graphite)|Other|55555;Kendall Morgan|Purple|55766;Zenowing|Silver|66666
+Ninja Steel:Brody Romero|Red|77666;Preston Tien|Blue|66666;Calvin Maxwell|Yellow|66666;Hayley Foster|White|66666;Sarah Thompson|Pink|66666;Levi Weston|Gold|77777;Dane Romero|Red|77777;Mick Kanic|Red|77777
+Beast Morphers:Devon Daniels|Red|77666;Ravi Shaw|Blue|66666;Zoey Reeves|Yellow|66666;Nate Silva|Gold|66666;Steel|Silver|66666
+Dino Fury:Zayto|Red|88777;Ollie Akana|Blue|66666;Amelia Jones|Pink|77777;Izzy Garcia|Green|66666;Javi Garcia|Black|66666;Aiyon|Gold|77666
+Cosmic Fury:Fern|Orange|66666
+Dark - Mighty Morphin:Tommy Oliver (Evil Green)|Dark|A5A9A;Justin (Dark Red)|Dark|55546;Bobby (Dark Blue)|Dark|55545;Zane (Dark Black)|Dark|55545;Kristen (Dark Pink)|Dark|55545;Tina (Dark Yellow)|Dark|55556
+Dark - Turbo:Shadow Rangers (team)|Dark|77666
+Dark - In Space:Psycho Red|Dark|88658;Psycho Blue|Dark|77647;Psycho Yellow|Dark|77647;Psycho Black|Dark|77647;Psycho Pink|Dark|87759
+Dark - S.P.D.:A-Squad Rangers (team)|Dark|88777
+Dark - Dino Charge:Heckyl (Dark Ranger)|Dark|77788
+Dark - Beast Morphers:Evil Grid Battleforce Rangers (team)|Dark|66555;Blaze (evil avatar)|Dark|55444;Roxy (evil avatar)|Dark|55444
+Dark - Dino Fury:Ollie Akana (Evil Blue)|Dark|66786
+Dark - Cosmic Fury:Dark Fury Ranger|Dark|66555`;
+const D=[];S.split("\n").forEach(l=>{const i=l.indexOf(":");const s=l.slice(0,i);l.slice(i+1).split(";").forEach(e=>{const [n,c,k]=e.split("|");D.push({n,c,s,v:[...k].map(x=>x==="A"?10:+x)})})});
+document.getElementById("cnt").textContent=D.length;
+const w=[3,2,2,2,2];let q="";
+const sl=document.getElementById("sl");
+K.forEach((k,i)=>{const d=document.createElement("div");d.innerHTML=`<label>${k}: <b id="v${i}">${w[i]}</b></label><input type="range" min="0" max="5" value="${w[i]}">`;
+d.querySelector("input").oninput=e=>{w[i]=+e.target.value;document.getElementById("v"+i).textContent=w[i];draw()};sl.appendChild(d)});
+document.getElementById("q").oninput=e=>{q=e.target.value.toLowerCase();draw()};
+const sc=r=>r.v.reduce((s,x,i)=>s+x*w[i],0)/(w.reduce((a,b)=>a+b,0)||1);
+const NT={"Tommy Oliver (Green)":"Rita's evil Sixth Ranger who nearly beat the team alone, then became the Dragonzord pilot and an all-time fan favorite. Near-perfect across the board.","Tommy Oliver (White)":"Became team leader with the Falconzord and Saba. Combat and leadership at the top, a notch below Green on pure iconic status.","Jason Lee Scott":"The original Red Ranger and a strong martial artist. Iconic maxed because every Red after him follows his template.","Billy Cranston":"Weak fighter, but he is the team's inventor and heart. Arc and Iconic are high because of his character, not his combat.","Kimberly Hart":"Top-tier fighter (gymnast background) with memorable Zords. Iconic as the original Pink Ranger.","Andros":"Space-born Red with a personal mission to rescue his sister Karone. Strong leader and a clear arc.","Mike Corbett (Magna Defender)":"Fights like a tank, and his arc from revenge to redemption is among the best in the franchise.","Eric Myers (Quantum)":"Wes's rival who grows into an ally. Strong fighter with a redemption arc.","Merrick Baliton (Lunar Wolf)":"Cursed knight who atones as the Lunar Wolf Ranger. Strong combat and a high arc score.","Psycho Pink":"Stands out among villains for destroying a Ranger, so combat and iconic score high for a Dark entry.","Ryan Mitchell (Titanium)":"Mystery Sixth Ranger with a family-driven arc."};
+const CR=["Combat","Leadership","Arsenal","Arc","Iconic"],BD=[["rarely wins fights","average or support","strong, reliable","elite"],["rarely leads","contributes ideas","leads or co-leads","team's strategic core"],["little gear of note","standard gear","notable gear or upgrade","signature gear"],["mostly static","some development","clear development","major growth or redemption"],["easily forgotten","known to season fans","well-known","franchise-defining"]];
+const why=r=>`<div class="why"><p>${NT[r.n]?"<b>Why:</b> "+NT[r.n]:"Rough estimate; no detailed write-up for this one."}</p><p>${r.v.map((x,i)=>`${CR[i]} <b>${x}</b> (${BD[i][x>=9?3:x>=7?2:x>=5?1:0]})`).join(" · ")}</p><p><small>${r.s}</small></p></div>`;
+function draw(){
+const L=D.map(r=>({...r,sc:sc(r)})).sort((a,b)=>b.sc-a.sc);L.forEach((r,i)=>r.rk=i+1);
+document.getElementById("rank").innerHTML=L.filter(r=>(r.n+r.s+r.c).toLowerCase().includes(q)).map(r=>`<details><summary class="row"><b>${r.rk}</b><span title="${r.s}"><i class="dot" style="background:${C[r.c]}"></i>${r.n}</span><div class="bar"><i style="width:${r.sc*10}%;background:${C[r.c]}"></i></div><b>${r.sc.toFixed(1)}</b></summary>${why(r)}</details>`).join("")||"<small>No matches</small>";
+document.getElementById("best").innerHTML=Object.keys(C).map(c=>{const b=L.find(r=>r.c===c);if(!b)return"";
+return `<div class="card best" style="border-top-color:${C[c]}"><small>${c} Ranger</small><br><b>${b.n}</b><br><small>${b.s} · overall #${b.rk}</small><div class="sc">${b.sc.toFixed(1)}</div></div>`}).join("")}
+draw();
+</script></body></html>
